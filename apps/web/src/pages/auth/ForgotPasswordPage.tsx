@@ -14,7 +14,7 @@ import {
   Alert,
 } from '@mui/material';
 
-import { authApi } from '@/services/api/authApi';
+import { authApi } from '../../services/api/authApi';
 
 export const ForgotPasswordPage = () => {
   const { t } = useTranslation('auth');

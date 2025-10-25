@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { authApi } from '@/services/api/authApi';
-import { setAuthToken, removeAuthToken, getAuthToken } from '@/utils/auth';
+import { authApi } from '../../services/api/authApi';
+import { setAuthToken, removeAuthToken, getAuthToken } from '../../utils/auth';
 
 // Types
 export interface User {

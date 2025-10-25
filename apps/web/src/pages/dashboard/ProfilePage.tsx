@@ -33,8 +33,8 @@ import {
   VisibilityOff,
 } from '@mui/icons-material';
 
-import { RootState } from '@/store';
-import { SUPPORTED_LANGUAGES } from '@/i18n';
+import { RootState } from '../../store';
+import { SUPPORTED_LANGUAGES } from '../../i18n';
 
 interface TabPanelProps {
   children?: React.ReactNode;

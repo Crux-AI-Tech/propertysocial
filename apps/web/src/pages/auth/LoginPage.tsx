@@ -25,8 +25,8 @@ import {
   Facebook as FacebookIcon,
 } from '@mui/icons-material';
 
-import { RootState, AppDispatch } from '@/store';
-import { login, resetAuthError } from '@/store/auth/authSlice';
+import { RootState, AppDispatch } from '../../store';
+import { login, resetAuthError } from '../../store/auth/authSlice';
 
 export const LoginPage = () => {
   const { t } = useTranslation('auth');

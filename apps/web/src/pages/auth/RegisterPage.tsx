@@ -32,8 +32,8 @@ import {
   Facebook as FacebookIcon,
 } from '@mui/icons-material';
 
-import { RootState, AppDispatch } from '@/store';
-import { register, resetAuthError } from '@/store/auth/authSlice';
+import { RootState, AppDispatch } from '../../store';
+import { register, resetAuthError } from '../../store/auth/authSlice';
 
 export const RegisterPage = () => {
   const { t } = useTranslation(['auth', 'common']);

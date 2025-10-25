@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store';
+import { RootState } from '../../store';
 
 export const ProtectedRoute = () => {
   const { isAuthenticated, isLoading } = useSelector((state: RootState) => state.auth);

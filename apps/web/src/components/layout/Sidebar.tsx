@@ -25,7 +25,7 @@ import {
   History as HistoryIcon,
 } from '@mui/icons-material';
 
-import { RootState } from '@/store';
+import { RootState } from '../../store';
 
 interface SidebarProps {
   open: boolean;

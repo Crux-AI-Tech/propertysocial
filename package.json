@@ -7,6 +7,12 @@
     "apps/*",
     "libs/*"
   ],
+  "resolutions": {
+    "lodash-es": "^4.17.21"
+  },
+  "overrides": {
+    "lodash-es": "^4.17.21"
+  },
   "scripts": {
     "build": "nx run-many --target=build --all",
     "test": "nx run-many --target=test --all",

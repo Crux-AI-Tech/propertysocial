@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
-import { authApi } from '@/services/api/authApi';
+import { authApi } from '../../services/api/authApi';
 
 export const ResetPasswordPage = () => {
   const { t } = useTranslation('auth');

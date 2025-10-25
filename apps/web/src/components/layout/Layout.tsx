@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Box, Container, useMediaQuery, useTheme } from '@mui/material';
 
-import { RootState } from '@/store';
+import { RootState } from '../../store';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { Sidebar } from './Sidebar';

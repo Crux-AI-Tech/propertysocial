@@ -43,7 +43,7 @@ import {
   ChevronRight,
 } from '@mui/icons-material';
 
-import { PropertyMap } from '@/components/property/PropertyMap';
+import { PropertyMap } from '../components/property/PropertyMap';
 
 // Mock property data
 const mockProperty = {

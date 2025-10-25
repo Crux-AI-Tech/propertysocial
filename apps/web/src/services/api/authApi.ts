@@ -1,9 +1,9 @@
 import axios from 'axios';
-import { getAuthToken } from '@/utils/auth';
+import { getAuthToken } from '../../utils/auth';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8020/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:7500/api',
   headers: {
     'Content-Type': 'application/json',
   },

@@ -9,7 +9,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 
-import { PropertyCard } from '@/components/property/PropertyCard';
+import { PropertyCard } from '../../components/property/PropertyCard';
 
 export const FavoritesPage = () => {
   const { t } = useTranslation(['property', 'common']);

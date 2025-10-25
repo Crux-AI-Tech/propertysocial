@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { CheckCircle, Error as ErrorIcon } from '@mui/icons-material';
 
-import { authApi } from '@/services/api/authApi';
+import { authApi } from '../../services/api/authApi';
 
 export const VerifyEmailPage = () => {
   const { t } = useTranslation('auth');

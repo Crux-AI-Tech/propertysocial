@@ -35,9 +35,9 @@ import {
   ViewList as ViewListIcon,
 } from '@mui/icons-material';
 
-import { PropertyCard } from '@/components/property/PropertyCard';
-import { PropertyMap } from '@/components/property/PropertyMap';
-import { PropertySearchFilters } from '@/components/property/PropertySearchFilters';
+import { PropertyCard } from '../components/property/PropertyCard';
+import { PropertyMap } from '../components/property/PropertyMap';
+import { PropertySearchFilters } from '../components/property/PropertySearchFilters';
 
 // Mock data for properties
 const mockProperties = Array.from({ length: 20 }, (_, i) => ({

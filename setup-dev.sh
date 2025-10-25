@@ -131,7 +131,7 @@ cleanup() {
 trap cleanup SIGINT SIGTERM
 
 # Start API server
-echo "🔧 Starting API server on port 8020..."
+echo "🔧 Starting API server on port 7500..."
 cd apps/api && npm run dev &
 API_PID=$!
 
@@ -139,15 +139,15 @@ API_PID=$!
 sleep 3
 
 # Start web server
-echo "🌐 Starting web server on port 5174..."
+echo "🌐 Starting web server on port 6500..."
 cd apps/web && npm run dev &
 WEB_PID=$!
 
 echo ""
 echo "✅ Development servers started!"
-echo "🔗 API: http://localhost:8020"
-echo "🔗 Web: http://localhost:5174"
-echo "🔗 Health: http://localhost:8020/health"
+echo "🔗 API: http://localhost:7500"
+echo "🔗 Web: http://localhost:6500"
+echo "🔗 Health: http://localhost:7500/health"
 echo ""
 echo "Press Ctrl+C to stop all servers"
 
@@ -178,10 +178,10 @@ echo -e "${BLUE}🏠 Buyer: buyer@eu-real-estate.com / password123${NC}"
 
 echo ""
 echo -e "${GREEN}🔗 Development URLs:${NC}"
-echo -e "${BLUE}API: http://localhost:8020${NC}"
-echo -e "${BLUE}Web: http://localhost:5174${NC}"
-echo -e "${BLUE}Health: http://localhost:8020/health${NC}"
-echo -e "${BLUE}Properties: http://localhost:8020/api/properties${NC}"
+echo -e "${BLUE}API: http://localhost:7500${NC}"
+echo -e "${BLUE}Web: http://localhost:6500${NC}"
+echo -e "${BLUE}Health: http://localhost:7500/health${NC}"
+echo -e "${BLUE}Properties: http://localhost:7500/api/properties${NC}"
 
 echo ""
 echo -e "${GREEN}✅ Development environment ready!${NC}"

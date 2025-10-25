@@ -27,9 +27,9 @@ import {
   PersonAdd,
 } from '@mui/icons-material';
 
-import { RootState, AppDispatch } from '@/store';
-import { logout } from '@/store/auth/authSlice';
-import { SUPPORTED_LANGUAGES } from '@/i18n';
+import { RootState, AppDispatch } from '../../store';
+import { logout } from '../../store/auth/authSlice';
+import { SUPPORTED_LANGUAGES } from '../../i18n';
 import { Logo } from '../ui/Logo';
 
 interface HeaderProps {

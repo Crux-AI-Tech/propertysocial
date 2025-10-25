@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EU Real Estate Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+        }
+        
+        .properties-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .property-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .property-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .property-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .property-content {
+            padding: 1.5rem;
+        }
+        
+        .property-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .property-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 1rem;
+        }
+        
+        .property-details {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .property-description {
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        
+        .demo-accounts {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+        
+        .demo-accounts h3 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .demo-accounts p {
+            margin: 0.5rem 0;
+            font-family: monospace;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 EU Real Estate Portal</h1>
+            <p>Your trusted partner for European real estate</p>
+        </div>
+        
+        <div class="card">
+            <div class="status">
+                <div class="status-indicator"></div>
+                <h2>Application Status</h2>
+            </div>
+            <p><strong>API Server:</strong> <span id="api-status">Checking...</span></p>
+            <p><strong>Web Server:</strong> Running on port 6500</p>
+            <p><strong>Environment:</strong> Development</p>
+        </div>
+        
+        <div class="card">
+            <h2>Available Properties</h2>
+            <div id="properties-container">
+                <div class="loading">Loading properties...</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>Test Authentication</h2>
+            <div id="auth-container">
+                <button class="btn" onclick="testLogin()">Test Login</button>
+                <div id="auth-result"></div>
+            </div>
+            
+            <div class="demo-accounts">
+                <h3>Demo Accounts:</h3>
+                <p>👤 Admin: admin@eu-real-estate.com / password123</p>
+                <p>🏢 Agent: agent@eu-real-estate.com / password123</p>
+                <p>🏠 Buyer: buyer@eu-real-estate.com / password123</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:7500';
+        
+        // Check API status
+        async function checkApiStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+                document.getElementById('api-status').textContent = `✅ ${data.status} (Uptime: ${Math.round(data.uptime)}s)`;
+            } catch (error) {
+                document.getElementById('api-status').textContent = '❌ Offline';
+            }
+        }
+        
+        // Load properties
+        async function loadProperties() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/properties`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const propertiesHtml = data.data.properties.map(property => `
+                        <div class="property-card">
+                            <img src="${property.images[0]?.url}" alt="${property.images[0]?.altText}" class="property-image">
+                            <div class="property-content">
+                                <div class="property-title">${property.title}</div>
+                                <div class="property-price">€${property.price.toLocaleString()}</div>
+                                <div class="property-details">
+                                    <span>📍 ${property.city}, ${property.country}</span>
+                                    <span>🛏️ ${property.bedrooms} bed</span>
+                                    <span>🚿 ${property.bathrooms} bath</span>
+                                    <span>📐 ${property.floorArea}m²</span>
+                                </div>
+                                <div class="property-description">${property.description}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('properties-container').innerHTML = `
+                        <div class="properties-grid">${propertiesHtml}</div>
+                    `;
+                } else {
+                    throw new Error('Failed to load properties');
+                }
+            } catch (error) {
+                document.getElementById('properties-container').innerHTML = `
+                    <div class="error">Error loading properties: ${error.message}</div>
+                `;
+            }
+        }
+        
+        // Test login
+        async function testLogin() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@eu-real-estate.com',
+                        password: 'password123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('auth-result').innerHTML = `
+                        <div style="background: #d4edda; color: #155724; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                            ✅ Login successful!<br>
+                            <strong>User:</strong> ${data.data.user.firstName} ${data.data.user.lastName}<br>
+                            <strong>Role:</strong> ${data.data.user.role}<br>
+                            <strong>Token:</strong> ${data.data.token}
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                document.getElementById('auth-result').innerHTML = `
+                    <div class="error" style="margin-top: 1rem;">
+                        ❌ Login failed: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkApiStatus();
+            loadProperties();
+        });
+    </script>
+</body>
+</html>

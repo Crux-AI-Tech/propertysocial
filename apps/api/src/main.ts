@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '../../.env' });
 
 const app = express();
-const PORT = process.env.PORT || 8020;
+const PORT = process.env.PORT || 7500;
 
 console.log('🔍 Debug - PORT from env:', process.env.PORT);
 console.log('🔍 Debug - Final PORT value:', PORT);
@@ -16,7 +16,7 @@ console.log('🔍 Debug - Final PORT value:', PORT);
 // Basic middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5174',
+  origin: process.env.FRONTEND_URL || 'http://localhost:6500',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],

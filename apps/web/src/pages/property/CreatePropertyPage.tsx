@@ -11,8 +11,8 @@ import {
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
-import { PropertyForm } from '@/components/property/PropertyForm';
-import { useAuth } from '@/hooks/useAuth';
+import { PropertyForm } from '../../components/property/PropertyForm';
+import { useAuth } from '../../hooks/useAuth';
 
 interface PropertyFormData {
   title: string;
