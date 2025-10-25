@@ -1,0 +1,13 @@
+{
+  "name": "@eu-real-estate/shared-utils",
+  "version": "1.0.0",
+  "description": "Shared utilities for EU Real Estate Portal",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

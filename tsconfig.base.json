@@ -1,0 +1,35 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2020", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@eu-real-estate/shared-types": ["libs/shared/types/src/index.ts"],
+      "@eu-real-estate/shared-utils": ["libs/shared/utils/src/index.ts"],
+      "@eu-real-estate/shared-config": ["libs/shared/config/src/index.ts"],
+      "@eu-real-estate/ui-components": ["libs/ui/components/src/index.ts"],
+      "@eu-real-estate/api-client": ["libs/api/client/src/index.ts"],
+      "@eu-real-estate/database": ["libs/database/src/index.ts"]
+    },
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
+  },
+  "exclude": ["node_modules", "tmp"]
+}

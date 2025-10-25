@@ -1,0 +1,28 @@
+{
+  "name": "@eu-real-estate/database",
+  "version": "1.0.0",
+  "description": "Database schemas and utilities for EU Real Estate Portal",
+  "main": "src/index.ts",
+  "scripts": {
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:seed": "tsx src/seed.ts",
+    "db:studio": "prisma studio",
+    "db:reset": "prisma migrate reset",
+    "db:types": "tsx src/scripts/generate-types.ts",
+    "db:init": "tsx src/init.ts",
+    "db:migrate:create": "tsx src/scripts/migrate.ts create"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.0",
+    "bcryptjs": "^2.4.3",
+    "redis": "^4.6.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.7.0",
+    "tsx": "^4.6.0",
+    "@types/bcryptjs": "^2.4.6"
+  }
+}

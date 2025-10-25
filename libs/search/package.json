@@ -1,0 +1,20 @@
+{
+  "name": "@eu-real-estate/search",
+  "version": "1.0.0",
+  "description": "Advanced search and analytics engine for EU Real Estate Portal",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@elastic/elasticsearch": "^8.10.0",
+    "@eu-real-estate/database": "*",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.8",
+    "jest": "^29.7.0",
+    "typescript": "^5.2.2"
+  }
+}

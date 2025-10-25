@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: eu-real-estate-postgres
+    environment:
+      POSTGRES_DB: eu_real_estate
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - eu-real-estate-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: eu-real-estate-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - eu-real-estate-network
+
+  # Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: eu-real-estate-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - eu-real-estate-network
+
+  # API Service (Development)
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile.dev
+    container_name: eu-real-estate-api
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/eu_real_estate
+      - REDIS_URL=redis://redis:6379
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - JWT_SECRET=dev-jwt-secret-change-in-production
+      - PORT=3020
+    ports:
+      - "3020:3020"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - postgres
+      - redis
+      - elasticsearch
+    networks:
+      - eu-real-estate-network
+    command: sh -c "cd apps/api && npm run dev"
+
+  # Web Application (Development)
+  web:
+    build:
+      context: .
+      dockerfile: docker/web/Dockerfile.dev
+    container_name: eu-real-estate-web
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:3020
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    networks:
+      - eu-real-estate-network
+    command: sh -c "cd apps/web && npm run dev"
+
+volumes:
+  postgres_data:
+  redis_data:
+  elasticsearch_data:
+
+networks:
+  eu-real-estate-network:
+    driver: bridge

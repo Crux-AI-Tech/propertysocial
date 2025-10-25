@@ -1,0 +1,802 @@
+openapi: 3.0.3
+info:
+  title: EU Real Estate Portal API
+  description: |
+    Comprehensive API for the European Real Estate Portal platform.
+    
+    This API provides endpoints for property management, user authentication,
+    third-party integrations, performance monitoring, and security management
+    across multiple European markets.
+    
+    ## Features
+    - Multi-language support (EN, DE, FR, ES, IT, NL)
+    - GDPR compliant data handling
+    - Advanced search and filtering
+    - Third-party integrations (valuations, mortgages, legal services)
+    - Real-time notifications
+    - Comprehensive security features
+    
+    ## Authentication
+    The API uses JWT (JSON Web Tokens) for authentication. Include the token
+    in the Authorization header: `Bearer <token>`
+    
+    ## Rate Limiting
+    - General API: 100 requests per 15 minutes
+    - Authentication: 5 requests per 15 minutes
+    - Password Reset: 3 requests per hour
+    - File Upload: 20 requests per hour
+    - Search: 30 requests per minute
+  version: 1.0.0
+  contact:
+    name: EU Real Estate Portal API Support
+    email: api-support@eu-real-estate.com
+    url: https://docs.eu-real-estate.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://eu-real-estate.com/terms
+
+servers:
+  - url: https://api.eu-real-estate.com/v1
+    description: Production server
+  - url: https://staging-api.eu-real-estate.com/v1
+    description: Staging server
+  - url: http://localhost:3000/api
+    description: Development server
+
+paths:
+  # Authentication Endpoints
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register new user
+      description: Create a new user account with email verification
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+            examples:
+              buyer:
+                summary: Buyer registration
+                value:
+                  email: buyer@example.com
+                  password: SecurePass123!
+                  firstName: John
+                  lastName: Doe
+                  role: BUYER
+                  country: DE
+                  language: en
+              agent:
+                summary: Agent registration
+                value:
+                  email: agent@example.com
+                  password: SecurePass123!
+                  firstName: Jane
+                  lastName: Smith
+                  role: AGENT
+                  country: FR
+                  language: fr
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user and return JWT tokens
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Get new access token using refresh token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                  description: Valid refresh token
+              required:
+                - refreshToken
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user profile
+      description: Retrieve authenticated user's profile information
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Property Endpoints
+  /properties:
+    get:
+      tags:
+        - Properties
+      summary: Search properties
+      description: Search and filter properties with pagination
+      operationId: searchProperties
+      parameters:
+        - name: query
+          in: query
+          description: Search query string
+          schema:
+            type: string
+            example: "luxury apartment berlin"
+        - name: city
+          in: query
+          description: Filter by city
+          schema:
+            type: string
+            example: "Berlin"
+        - name: country
+          in: query
+          description: Filter by country (ISO 3166-1 alpha-2)
+          schema:
+            type: string
+            pattern: '^[A-Z]{2}$'
+            example: "DE"
+        - name: propertyType
+          in: query
+          description: Filter by property type
+          schema:
+            $ref: '#/components/schemas/PropertyType'
+        - name: minPrice
+          in: query
+          description: Minimum price filter
+          schema:
+            type: number
+            minimum: 0
+            example: 300000
+        - name: maxPrice
+          in: query
+          description: Maximum price filter
+          schema:
+            type: number
+            minimum: 0
+            example: 800000
+        - name: sortBy
+          in: query
+          description: Sort field
+          schema:
+            type: string
+            enum: [price, size, createdAt, updatedAt]
+            default: createdAt
+        - name: sortOrder
+          in: query
+          description: Sort order
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: page
+          in: query
+          description: Page number (1-based)
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Properties retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertySearchResponse'
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Properties
+      summary: Create new property
+      description: Create a new property listing (agents only)
+      operationId: createProperty
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertyCreate'
+      responses:
+        '201':
+          description: Property created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /properties/{id}:
+    get:
+      tags:
+        - Properties
+      summary: Get property by ID
+      description: Retrieve detailed property information
+      operationId: getPropertyById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Property ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Property retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyResponse'
+        '404':
+          description: Property not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from login endpoint
+
+  schemas:
+    # Authentication Schemas
+    UserRegistration:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+        - role
+        - country
+        - language
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: user@example.com
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          description: User's password (must meet security requirements)
+          example: SecurePass123!
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: User's first name
+          example: John
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: User's last name
+          example: Doe
+        role:
+          $ref: '#/components/schemas/UserRole'
+        country:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          description: User's country (ISO 3166-1 alpha-2)
+          example: DE
+        language:
+          type: string
+          pattern: '^[a-z]{2}$'
+          description: User's preferred language (ISO 639-1)
+          example: en
+
+    UserLogin:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: user@example.com
+        password:
+          type: string
+          description: User's password
+          example: SecurePass123!
+
+    AuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            tokens:
+              $ref: '#/components/schemas/Tokens'
+
+    TokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            tokens:
+              $ref: '#/components/schemas/Tokens'
+
+    Tokens:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refreshToken:
+          type: string
+          description: JWT refresh token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        expiresIn:
+          type: integer
+          description: Access token expiration time in seconds
+          example: 3600
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: User's unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: user@example.com
+        firstName:
+          type: string
+          description: User's first name
+          example: John
+        lastName:
+          type: string
+          description: User's last name
+          example: Doe
+        role:
+          $ref: '#/components/schemas/UserRole'
+        status:
+          $ref: '#/components/schemas/UserStatus'
+        country:
+          type: string
+          description: User's country
+          example: DE
+        language:
+          type: string
+          description: User's preferred language
+          example: en
+        emailVerified:
+          type: boolean
+          description: Whether user's email is verified
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          description: User creation timestamp
+          example: 2025-01-21T10:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: User last update timestamp
+          example: 2025-01-21T10:00:00Z
+
+    UserProfile:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+
+    UserRole:
+      type: string
+      enum: [BUYER, AGENT, ADMIN]
+      description: User's role in the system
+      example: BUYER
+
+    UserStatus:
+      type: string
+      enum: [PENDING_VERIFICATION, ACTIVE, SUSPENDED, DELETED]
+      description: User's account status
+      example: ACTIVE
+
+    # Property Schemas
+    Property:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Property's unique identifier
+          example: 123e4567-e89b-12d3-a456-426614174000
+        title:
+          type: string
+          description: Property title
+          example: Beautiful Apartment in Berlin
+        description:
+          type: string
+          description: Property description
+          example: A stunning 2-bedroom apartment in the heart of Berlin
+        propertyType:
+          $ref: '#/components/schemas/PropertyType'
+        status:
+          $ref: '#/components/schemas/PropertyStatus'
+        price:
+          type: number
+          description: Property price
+          example: 450000
+        currency:
+          type: string
+          description: Price currency (ISO 4217)
+          example: EUR
+        size:
+          type: number
+          description: Property size in square meters
+          example: 85
+        bedrooms:
+          type: integer
+          description: Number of bedrooms
+          example: 2
+        bathrooms:
+          type: integer
+          description: Number of bathrooms
+          example: 1
+        address:
+          type: string
+          description: Property address
+          example: Unter den Linden 1
+        city:
+          type: string
+          description: Property city
+          example: Berlin
+        country:
+          type: string
+          description: Property country
+          example: DE
+        postalCode:
+          type: string
+          description: Property postal code
+          example: 10117
+        latitude:
+          type: number
+          format: double
+          description: Property latitude
+          example: 52.5162746
+        longitude:
+          type: number
+          format: double
+          description: Property longitude
+          example: 13.3777041
+        agent:
+          $ref: '#/components/schemas/User'
+        createdAt:
+          type: string
+          format: date-time
+          description: Property creation timestamp
+          example: 2025-01-21T10:00:00Z
+        updatedAt:
+          type: string
+          format: date-time
+          description: Property last update timestamp
+          example: 2025-01-21T10:00:00Z
+
+    PropertyCreate:
+      type: object
+      required:
+        - title
+        - description
+        - propertyType
+        - price
+        - currency
+        - size
+        - address
+        - city
+        - country
+        - postalCode
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Property title
+          example: Beautiful Apartment in Berlin
+        description:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Property description
+          example: A stunning 2-bedroom apartment in the heart of Berlin
+        propertyType:
+          $ref: '#/components/schemas/PropertyType'
+        price:
+          type: number
+          minimum: 0
+          description: Property price
+          example: 450000
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          description: Price currency (ISO 4217)
+          example: EUR
+        size:
+          type: number
+          minimum: 0
+          description: Property size in square meters
+          example: 85
+        bedrooms:
+          type: integer
+          minimum: 0
+          description: Number of bedrooms
+          example: 2
+        bathrooms:
+          type: integer
+          minimum: 0
+          description: Number of bathrooms
+          example: 1
+        address:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Property address
+          example: Unter den Linden 1
+        city:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Property city
+          example: Berlin
+        country:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          description: Property country (ISO 3166-1 alpha-2)
+          example: DE
+        postalCode:
+          type: string
+          minLength: 1
+          maxLength: 20
+          description: Property postal code
+          example: 10117
+        latitude:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+          description: Property latitude
+          example: 52.5162746
+        longitude:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+          description: Property longitude
+          example: 13.3777041
+
+    PropertyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            property:
+              $ref: '#/components/schemas/Property'
+
+    PropertySearchResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            properties:
+              type: array
+              items:
+                $ref: '#/components/schemas/Property'
+            total:
+              type: integer
+              description: Total number of properties matching the search
+              example: 150
+            page:
+              type: integer
+              description: Current page number
+              example: 1
+            totalPages:
+              type: integer
+              description: Total number of pages
+              example: 8
+            limit:
+              type: integer
+              description: Number of items per page
+              example: 20
+
+    PropertyType:
+      type: string
+      enum: [APARTMENT, HOUSE, COMMERCIAL, LAND]
+      description: Type of property
+      example: APARTMENT
+
+    PropertyStatus:
+      type: string
+      enum: [DRAFT, ACTIVE, SOLD, RENTED, INACTIVE]
+      description: Property listing status
+      example: ACTIVE
+
+    # Common Schemas
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Error code
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              description: Error message
+              example: Invalid input provided
+            details:
+              type: object
+              description: Additional error details
+              example: {}
+            timestamp:
+              type: string
+              format: date-time
+              description: Error timestamp
+              example: 2025-01-21T10:00:00Z
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Properties
+    description: Property management and search
+
+externalDocs:
+  description: Find out more about EU Real Estate Portal
+  url: https://docs.eu-real-estate.com

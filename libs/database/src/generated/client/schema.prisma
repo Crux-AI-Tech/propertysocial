@@ -1,0 +1,335 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../src/generated/client"
+  binaryTargets = ["native", "linux-musl", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../../../dev.db"
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  phone        String?
+  avatar       String?
+  role         String    @default("BUYER") // BUYER, SELLER, AGENT, ADMIN, DEVELOPER
+  isVerified   Boolean   @default(false)
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  // Profile information
+  bio      String?
+  company  String?
+  website  String?
+  country  String?
+  city     String?
+  language String  @default("en")
+  currency String  @default("EUR")
+  timezone String?
+
+  // Preferences
+  emailNotifications Boolean @default(true)
+  smsNotifications   Boolean @default(false)
+  pushNotifications  Boolean @default(true)
+  marketingEmails    Boolean @default(false)
+
+  // Verification
+  emailVerified     Boolean   @default(false)
+  phoneVerified     Boolean   @default(false)
+  verificationToken String?
+  tokenExpiresAt    DateTime?
+
+  // Relationships
+  properties         Property[]
+  buyerTransactions  Transaction[]      @relation("BuyerTransactions")
+  sellerTransactions Transaction[]      @relation("SellerTransactions")
+  agentTransactions  Transaction[]      @relation("AgentTransactions")
+  searches           SavedSearch[]
+  favorites          PropertyFavorite[]
+  notifications      Notification[]
+  sentMessages       Message[]          @relation("MessageSender")
+  receivedMessages   Message[]          @relation("MessageReceiver")
+  reviews            Review[]
+  reviewsReceived    Review[]           @relation("ReviewTarget")
+  offers             Offer[]
+
+  @@map("users")
+}
+
+model Property {
+  id           String    @id @default(uuid())
+  title        String
+  description  String
+  price        Float
+  currency     String    @default("EUR")
+  propertyType String // APARTMENT, HOUSE, COMMERCIAL, LAND
+  listingType  String // SALE, RENT, LEASE
+  status       String    @default("DRAFT") // DRAFT, ACTIVE, SOLD, RENTED, INACTIVE
+  isActive     Boolean   @default(true)
+  isFeatured   Boolean   @default(false)
+  viewCount    Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  publishedAt  DateTime?
+  expiresAt    DateTime?
+
+  // Owner/Agent information
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id])
+
+  // Location information
+  street    String?
+  city      String?
+  postcode  String?
+  county    String?
+  country   String?
+  latitude  Float?
+  longitude Float?
+
+  // Property details
+  bedrooms        Int?
+  bathrooms       Int?
+  receptionRooms  Int?
+  floorArea       Float?
+  plotSize        Float?
+  floors          Int?
+  buildYear       Int?
+  energyRating    String?
+  furnished       Boolean @default(false)
+  garden          Boolean @default(false)
+  parking         Boolean @default(false)
+  garage          Boolean @default(false)
+  balcony         Boolean @default(false)
+  terrace         Boolean @default(false)
+  elevator        Boolean @default(false)
+  airConditioning Boolean @default(false)
+  heating         String?
+  petFriendly     Boolean @default(false)
+
+  // Relationships
+  transactions Transaction[]
+  favorites    PropertyFavorite[]
+  reviews      Review[]
+  images       PropertyImage[]
+  tags         PropertyToTag[]
+
+  @@map("properties")
+}
+
+model PropertyImage {
+  id         String   @id @default(uuid())
+  propertyId String
+  url        String
+  altText    String?
+  caption    String?
+  order      Int      @default(0)
+  isMain     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("property_images")
+}
+
+model PropertyTag {
+  id          String   @id @default(uuid())
+  name        String
+  category    String
+  description String?
+  color       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  properties PropertyToTag[]
+
+  @@unique([name, category])
+  @@map("property_tags")
+}
+
+model PropertyToTag {
+  propertyId String
+  tagId      String
+  createdAt  DateTime @default(now())
+
+  property Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tag      PropertyTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([propertyId, tagId])
+  @@map("property_to_tags")
+}
+
+model Transaction {
+  id             String  @id @default(uuid())
+  propertyId     String
+  buyerId        String?
+  sellerId       String
+  agentId        String?
+  type           String // PURCHASE, RENTAL, LEASE
+  status         String  @default("DRAFT") // DRAFT, PENDING, ACCEPTED, REJECTED, COMPLETED, CANCELLED
+  offerAmount    Float?
+  finalAmount    Float?
+  currency       String  @default("EUR")
+  commission     Float?
+  commissionRate Float?
+
+  // Timeline
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  offerDate          DateTime?
+  acceptedDate       DateTime?
+  completionDate     DateTime?
+  expectedCompletion DateTime?
+
+  // Additional details
+  notes    String?
+  terms    String? // JSON string of terms and conditions
+  metadata String? // JSON string for additional data
+
+  // Relationships
+  property Property @relation(fields: [propertyId], references: [id])
+  buyer    User?    @relation("BuyerTransactions", fields: [buyerId], references: [id])
+  seller   User     @relation("SellerTransactions", fields: [sellerId], references: [id])
+  agent    User?    @relation("AgentTransactions", fields: [agentId], references: [id])
+
+  offers   Offer[]
+  messages Message[]
+
+  @@index([propertyId])
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([agentId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+model SavedSearch {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String
+  criteria  String // Search criteria as JSON string
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("saved_searches")
+}
+
+model PropertyFavorite {
+  id         String   @id @default(uuid())
+  userId     String
+  propertyId String
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+  @@map("property_favorites")
+}
+
+model Message {
+  id            String   @id @default(uuid())
+  senderId      String
+  receiverId    String
+  transactionId String?
+  subject       String?
+  content       String
+  isRead        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  sender      User         @relation("MessageSender", fields: [senderId], references: [id])
+  receiver    User         @relation("MessageReceiver", fields: [receiverId], references: [id])
+  transaction Transaction? @relation(fields: [transactionId], references: [id])
+
+  @@map("messages")
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  type      String // EMAIL, SMS, PUSH, IN_APP
+  status    String    @default("PENDING") // PENDING, SENT, DELIVERED, FAILED, READ
+  title     String
+  content   String
+  data      String? // Additional data as JSON string
+  sentAt    DateTime?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  propertyId String
+  reviewerId String
+  targetId   String // User being reviewed (agent, seller, etc.)
+  rating     Int // 1-5 stars
+  title      String?
+  content    String
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id])
+  reviewer User     @relation(fields: [reviewerId], references: [id])
+  target   User     @relation("ReviewTarget", fields: [targetId], references: [id])
+
+  @@map("reviews")
+}
+
+model Offer {
+  id            String    @id @default(uuid())
+  transactionId String
+  offererId     String
+  amount        Float
+  currency      String    @default("EUR")
+  status        String    @default("PENDING") // PENDING, ACCEPTED, REJECTED, COUNTERED, WITHDRAWN, EXPIRED
+  message       String?
+  conditions    String? // JSON string of offer conditions
+  validUntil    DateTime?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  respondedAt DateTime?
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  offerer     User        @relation(fields: [offererId], references: [id])
+
+  @@index([transactionId])
+  @@index([offererId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("offers")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  action     String
+  resource   String
+  resourceId String?
+  oldData    String? // JSON string
+  newData    String? // JSON string
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}
