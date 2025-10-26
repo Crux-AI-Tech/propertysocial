@@ -22,6 +22,7 @@ import { ProfilePage } from './pages/dashboard/ProfilePage';
 import { FavoritesPage } from './pages/dashboard/FavoritesPage';
 import { SavedSearchesPage } from './pages/dashboard/SavedSearchesPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import SocialShareDemo from './pages/SocialShareDemo';
 
 function App() {
   const { i18n } = useTranslation();
@@ -50,6 +51,7 @@ function App() {
         <Route index element={<HomePage />} />
         <Route path="search" element={<PropertySearchPage />} />
         <Route path="properties/:id" element={<PropertyDetailsPage />} />
+        <Route path="social-demo" element={<SocialShareDemo />} />
         
         {/* Auth routes - redirect if already authenticated */}
         <Route 

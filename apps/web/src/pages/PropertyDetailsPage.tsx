@@ -44,6 +44,7 @@ import {
 } from '@mui/icons-material';
 
 import { PropertyMap } from '../components/property/PropertyMap';
+import { PropertySocialShare } from '../components/social';
 
 // Mock property data
 const mockProperty = {
@@ -434,16 +435,12 @@ export const PropertyDetailsPage = () => {
                 >
                   {isFavorite ? <Favorite color="error" /> : <FavoriteBorder />}
                 </IconButton>
-                <IconButton
-                  aria-label={t('property:details.share')}
-                  onClick={() => navigator.clipboard.writeText(window.location.href)}
-                  sx={{
-                    border: 1,
-                    borderColor: 'divider',
-                  }}
-                >
-                  <Share />
-                </IconButton>
+                <PropertySocialShare
+                  property={property}
+                  variant="menu"
+                  size="medium"
+                  showAnalytics={true}
+                />
               </Box>
             </CardContent>
           </Card>

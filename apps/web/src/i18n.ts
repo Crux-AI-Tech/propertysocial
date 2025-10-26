@@ -49,7 +49,7 @@ i18n
     defaultNS: 'common',
     
     // Namespaces to load
-    ns: ['common', 'auth', 'property', 'search', 'dashboard'],
+    ns: ['common', 'auth', 'property', 'search', 'dashboard', 'social'],
   });
 
 export default i18n;
