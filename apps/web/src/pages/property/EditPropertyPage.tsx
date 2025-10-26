@@ -128,8 +128,9 @@ export const EditPropertyPage = () => {
       setError(null);
       
       try {
-        // TODO: Replace with actual API call
-        const response = await fetch(`/api/properties/${id}`, {
+        // Fetch property data from API
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7500/api';
+        const response = await fetch(`${apiUrl}/properties/${id}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
           },
@@ -166,31 +167,15 @@ export const EditPropertyPage = () => {
     setError(null);
     
     try {
-      // Create FormData for file uploads
-      const formData = new FormData();
-      
-      // Add basic property data
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === 'images' || key === 'documents') {
-          // Handle file arrays separately
-          (value as File[]).forEach((file, index) => {
-            formData.append(`${key}[${index}]`, file);
-          });
-        } else if (key === 'tags') {
-          // Handle tags array
-          formData.append(key, JSON.stringify(value));
-        } else if (value !== undefined && value !== null && value !== '') {
-          formData.append(key, value.toString());
-        }
-      });
-      
-      // TODO: Replace with actual API call
-      const response = await fetch(`/api/properties/${id}`, {
+      // Update property via API
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:7500/api';
+      const response = await fetch(`${apiUrl}/properties/${id}`, {
         method: 'PUT',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
-        body: formData,
+        body: JSON.stringify(data),
       });
       
       if (!response.ok) {
