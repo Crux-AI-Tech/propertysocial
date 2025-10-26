@@ -161,6 +161,196 @@ app.get('/api/properties', (req, res) => {
   });
 });
 
+// Create property endpoint
+app.post('/api/properties', (req, res) => {
+  const {
+    title,
+    description,
+    price,
+    currency = 'EUR',
+    propertyType,
+    listingType,
+    bedrooms,
+    bathrooms,
+    size,
+    yearBuilt,
+    energyRating,
+    location,
+    features,
+    amenities,
+    images
+  } = req.body;
+
+  // Basic validation
+  if (!title || !description || !price || !propertyType || !location) {
+    return res.status(400).json({
+      success: false,
+      message: 'Missing required fields: title, description, price, propertyType, location',
+    });
+  }
+
+  // Generate a new property ID
+  const newPropertyId = Date.now().toString();
+
+  // Create the new property object
+  const newProperty = {
+    id: newPropertyId,
+    title,
+    description,
+    price: parseFloat(price),
+    currency,
+    propertyType,
+    listingType: listingType || 'SALE',
+    bedrooms: bedrooms ? parseInt(bedrooms) : undefined,
+    bathrooms: bathrooms ? parseInt(bathrooms) : undefined,
+    size: size ? parseFloat(size) : undefined,
+    yearBuilt: yearBuilt ? parseInt(yearBuilt) : undefined,
+    energyRating,
+    location: {
+      address: location.address,
+      city: location.city,
+      country: location.country,
+      postalCode: location.postalCode,
+      latitude: location.latitude,
+      longitude: location.longitude,
+    },
+    features: features || {},
+    amenities: amenities || [],
+    images: images || [],
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    owner: {
+      firstName: 'Jane',
+      lastName: 'Agent',
+      email: 'agent@eu-real-estate.com'
+    },
+    tags: []
+  };
+
+  console.log('📝 Creating new property:', {
+    id: newPropertyId,
+    title,
+    price: `${currency} ${price}`,
+    type: propertyType,
+    location: `${location.city}, ${location.country}`
+  });
+
+  // In a real app, this would be saved to a database
+  // For now, we'll just return the created property
+  res.status(201).json({
+    success: true,
+    message: 'Property created successfully',
+    data: {
+      property: newProperty
+    }
+  });
+});
+
+// Update property endpoint
+app.put('/api/properties/:id', (req, res) => {
+  const { id } = req.params;
+  const updateData = req.body;
+
+  console.log('📝 Updating property:', id, 'with data:', Object.keys(updateData));
+
+  // In a real app, this would update the property in the database
+  // For now, we'll just return a success response
+  res.json({
+    success: true,
+    message: 'Property updated successfully',
+    data: {
+      property: {
+        id,
+        ...updateData,
+        updatedAt: new Date().toISOString()
+      }
+    }
+  });
+});
+
+// Delete property endpoint
+app.delete('/api/properties/:id', (req, res) => {
+  const { id } = req.params;
+
+  console.log('🗑️ Deleting property:', id);
+
+  // In a real app, this would delete the property from the database
+  res.json({
+    success: true,
+    message: 'Property deleted successfully'
+  });
+});
+
+// Get single property endpoint
+app.get('/api/properties/:id', (req, res) => {
+  const { id } = req.params;
+
+  // Mock property data - in a real app, this would come from the database
+  const mockProperty = {
+    id,
+    title: 'Beautiful Apartment in Berlin Mitte',
+    description: 'A stunning 2-bedroom apartment in the heart of Berlin with modern amenities and city views.',
+    price: 450000,
+    currency: 'EUR',
+    propertyType: 'APARTMENT',
+    listingType: 'SALE',
+    bedrooms: 2,
+    bathrooms: 1,
+    size: 85,
+    yearBuilt: 2018,
+    energyRating: 'A',
+    location: {
+      address: 'Unter den Linden 1',
+      city: 'Berlin',
+      country: 'Germany',
+      postalCode: '10117',
+      latitude: 52.5200,
+      longitude: 13.4050,
+    },
+    features: {
+      garden: false,
+      parking: true,
+      balcony: true,
+      elevator: true,
+      airConditioning: true,
+      heating: 'Central',
+      petFriendly: false,
+      furnished: false,
+    },
+    amenities: ['WiFi', 'Kitchen', 'Washing Machine', 'Dishwasher'],
+    images: [
+      {
+        id: '1',
+        url: 'https://images.unsplash.com/photo-1560448204-603b3fc33ddc?w=800',
+        altText: 'Living room view',
+        isMain: true
+      }
+    ],
+    status: 'ACTIVE',
+    createdAt: '2023-10-01T10:00:00Z',
+    updatedAt: '2023-10-01T10:00:00Z',
+    owner: {
+      firstName: 'Jane',
+      lastName: 'Agent',
+      email: 'agent@eu-real-estate.com'
+    },
+    agent: {
+      name: 'Jane Agent',
+      email: 'agent@eu-real-estate.com',
+      phone: '+49 30 12345678',
+      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150'
+    }
+  };
+
+  res.json({
+    success: true,
+    data: {
+      property: mockProperty
+    }
+  });
+});
+
 // Mock auth endpoint
 app.post('/api/auth/login', (req, res) => {
   const { email, password } = req.body;

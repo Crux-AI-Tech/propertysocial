@@ -9,7 +9,7 @@ export interface User {
   firstName: string;
   lastName: string;
   role: string;
-  isVerified: boolean;
+  isVerified?: boolean;
   avatar?: string;
 }
 
@@ -34,10 +34,15 @@ export const login = createAsyncThunk(
   async (credentials: { email: string; password: string }, { rejectWithValue }) => {
     try {
       const response = await authApi.login(credentials);
-      setAuthToken(response.data.tokens.accessToken);
-      return response.data;
+      // API returns { success: true, data: { user: {...}, token: "..." } }
+      if (response.data.success && response.data.data.token) {
+        setAuthToken(response.data.data.token);
+        return response.data.data;
+      } else {
+        return rejectWithValue(response.data.message || 'Login failed');
+      }
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error?.message || 'Login failed');
+      return rejectWithValue(error.response?.data?.message || error.message || 'Login failed');
     }
   }
 );
