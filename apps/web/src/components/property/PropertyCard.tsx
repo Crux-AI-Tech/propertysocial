@@ -8,6 +8,9 @@ import {
   IconButton,
   Typography,
   Skeleton,
+  Chip,
+  Fade,
+  Tooltip,
 } from '@mui/material';
 import {
   Favorite,
@@ -17,6 +20,12 @@ import {
   BookmarkBorder,
   Bookmark,
   MoreVert,
+  LocalParking,
+  Deck,
+  Elevator,
+  Yard,
+  Weekend,
+  Bolt,
 } from '@mui/icons-material';
 
 interface PropertyCardProps {
@@ -36,6 +45,7 @@ interface PropertyCardProps {
     };
     images: string[];
     features?: Record<string, boolean>;
+    energyRating?: string;
     agent?: {
       name?: string;
       avatar?: string;
@@ -50,6 +60,7 @@ export const PropertyCard = ({ property, isFavorite = false, onToggleFavorite }:
   const [imageLoaded, setImageLoaded] = useState(false);
   const [localFavorite, setLocalFavorite] = useState(isFavorite);
   const [localSaved, setLocalSaved] = useState(false);
+  const [showFeatures, setShowFeatures] = useState(false);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -74,6 +85,41 @@ export const PropertyCard = ({ property, isFavorite = false, onToggleFavorite }:
       maximumFractionDigits: 0,
     }).format(price);
   };
+
+  // Get energy rating color
+  const getEnergyRatingColor = (rating?: string) => {
+    if (!rating) return '#9e9e9e';
+    const colors: Record<string, string> = {
+      'A+': '#00c853',
+      'A': '#64dd17',
+      'B': '#aeea00',
+      'C': '#ffd600',
+      'D': '#ffab00',
+      'E': '#ff6d00',
+      'F': '#ff3d00',
+      'G': '#d50000',
+    };
+    return colors[rating] || '#9e9e9e';
+  };
+
+  // Get feature icon and label
+  const getFeatureIcon = (feature: string) => {
+    const icons: Record<string, { icon: JSX.Element; label: string }> = {
+      parking: { icon: <LocalParking fontSize="small" />, label: t('property:features.parking') },
+      balcony: { icon: <Deck fontSize="small" />, label: t('property:features.balcony') },
+      elevator: { icon: <Elevator fontSize="small" />, label: t('property:features.elevator') },
+      garden: { icon: <Yard fontSize="small" />, label: t('property:features.garden') },
+      furnished: { icon: <Weekend fontSize="small" />, label: t('property:features.furnished') },
+    };
+    return icons[feature] || null;
+  };
+
+  // Get enabled features
+  const enabledFeatures = property.features
+    ? Object.entries(property.features)
+        .filter(([_, value]) => value === true)
+        .map(([key]) => key)
+    : [];
 
   return (
     <Card 
@@ -119,6 +165,8 @@ export const PropertyCard = ({ property, isFavorite = false, onToggleFavorite }:
           display: 'block',
           textDecoration: 'none',
         }}
+        onMouseEnter={() => setShowFeatures(true)}
+        onMouseLeave={() => setShowFeatures(false)}
       >
         {!imageLoaded && (
           <Skeleton 
@@ -147,6 +195,103 @@ export const PropertyCard = ({ property, isFavorite = false, onToggleFavorite }:
             display: imageLoaded ? 'block' : 'none',
           }}
         />
+
+        {/* Energy Rating Badge - Top Right (EU Requirement) */}
+        {property.energyRating && (
+          <Tooltip title={`Energy Rating: ${property.energyRating}`} placement="left">
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                bgcolor: getEnergyRatingColor(property.energyRating),
+                color: 'white',
+                px: 1.5,
+                py: 0.5,
+                borderRadius: 1,
+                fontWeight: 700,
+                fontSize: '0.875rem',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+              }}
+            >
+              <Bolt sx={{ fontSize: 16 }} />
+              {property.energyRating}
+            </Box>
+          </Tooltip>
+        )}
+
+        {/* Listing Type Badge - Top Left */}
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 12,
+            left: 12,
+            bgcolor: property.listingType === 'SALE' ? 'secondary.main' : 'success.main',
+            color: 'white',
+            px: 1.5,
+            py: 0.5,
+            borderRadius: 1,
+            fontWeight: 600,
+            fontSize: '0.75rem',
+            textTransform: 'uppercase',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+          }}
+        >
+          {t(`property:listingTypes.${property.listingType.toLowerCase()}`)}
+        </Box>
+
+        {/* Property Features Overlay - Shows on hover */}
+        <Fade in={showFeatures && enabledFeatures.length > 0}>
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              bgcolor: 'rgba(0, 0, 0, 0.75)',
+              backdropFilter: 'blur(10px)',
+              p: 2,
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 1,
+            }}
+          >
+            {enabledFeatures.slice(0, 5).map((feature) => {
+              const featureData = getFeatureIcon(feature);
+              if (!featureData) return null;
+              return (
+                <Chip
+                  key={feature}
+                  icon={featureData.icon}
+                  label={featureData.label}
+                  size="small"
+                  sx={{
+                    bgcolor: 'rgba(255, 255, 255, 0.9)',
+                    color: 'text.primary',
+                    fontWeight: 500,
+                    '& .MuiChip-icon': {
+                      color: 'primary.main',
+                    },
+                  }}
+                />
+              );
+            })}
+            {enabledFeatures.length > 5 && (
+              <Chip
+                label={`+${enabledFeatures.length - 5} more`}
+                size="small"
+                sx={{
+                  bgcolor: 'rgba(255, 255, 255, 0.9)',
+                  color: 'text.primary',
+                  fontWeight: 500,
+                }}
+              />
+            )}
+          </Box>
+        </Fade>
       </Box>
 
       {/* Action buttons - Instagram style */}
@@ -225,16 +370,6 @@ export const PropertyCard = ({ property, isFavorite = false, onToggleFavorite }:
             }}
           >
             #{t(`property:types.${property.propertyType.toLowerCase()}`)}
-          </Typography>
-          <Typography 
-            variant="caption" 
-            sx={{ 
-              color: property.listingType === 'SALE' ? 'secondary.main' : 'success.main',
-              fontWeight: 600,
-              fontSize: '0.75rem'
-            }}
-          >
-            #{t(`property:listingTypes.${property.listingType.toLowerCase()}`)}
           </Typography>
         </Box>
       </Box>
