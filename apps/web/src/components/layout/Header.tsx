@@ -18,11 +18,7 @@ import {
 } from '@mui/material';
 import {
   Menu as MenuIcon,
-  AccountCircle,
   Translate,
-  Favorite,
-  Search,
-  Home,
   Login,
   PersonAdd,
 } from '@mui/icons-material';
@@ -46,7 +42,6 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
 
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const [anchorElLang, setAnchorElLang] = useState<null | HTMLElement>(null);
-  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
@@ -56,20 +51,12 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
     setAnchorElLang(event.currentTarget);
   };
 
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget);
-  };
-
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
 
   const handleCloseLangMenu = () => {
     setAnchorElLang(null);
-  };
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
   };
 
   const handleLanguageChange = (langCode: string) => {
@@ -87,6 +74,20 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
     <AppBar position="sticky" color="default" elevation={1}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
+          {/* Mobile sidebar toggle button */}
+          {isMobile && (
+            <IconButton
+              size="large"
+              edge="start"
+              color="inherit"
+              aria-label="open sidebar"
+              onClick={toggleSidebar}
+              sx={{ mr: 2, display: { xs: 'flex', md: 'none' } }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
+
           {/* Logo */}
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
             <RouterLink to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
@@ -94,66 +95,8 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
             </RouterLink>
           </Box>
 
-          {/* Mobile menu button */}
-          {isMobile && (
-            <Box sx={{ flexGrow: 0, display: { xs: 'flex', md: 'none' } }}>
-              <IconButton
-                size="large"
-                aria-label="menu"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleOpenNavMenu}
-                color="inherit"
-              >
-                <MenuIcon />
-              </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorElNav}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left',
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'left',
-                }}
-                open={Boolean(anchorElNav)}
-                onClose={handleCloseNavMenu}
-                sx={{
-                  display: { xs: 'block', md: 'none' },
-                }}
-              >
-                <MenuItem onClick={() => { handleCloseNavMenu(); navigate('/'); }}>
-                  <Home fontSize="small" sx={{ mr: 1 }} />
-                  <Typography textAlign="center">{t('common:nav.home')}</Typography>
-                </MenuItem>
-                <MenuItem onClick={() => { handleCloseNavMenu(); navigate('/search'); }}>
-                  <Search fontSize="small" sx={{ mr: 1 }} />
-                  <Typography textAlign="center">{t('common:nav.search')}</Typography>
-                </MenuItem>
-              </Menu>
-            </Box>
-          )}
-
-          {/* Desktop navigation */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            <Button
-              component={RouterLink}
-              to="/"
-              sx={{ my: 2, color: 'text.primary', display: 'block' }}
-            >
-              {t('common:nav.home')}
-            </Button>
-            <Button
-              component={RouterLink}
-              to="/search"
-              sx={{ my: 2, color: 'text.primary', display: 'block' }}
-            >
-              {t('common:nav.search')}
-            </Button>
-          </Box>
+          {/* Desktop navigation - removed as navigation is now in sidebar */}
+          <Box sx={{ flexGrow: 1 }} />
 
           {/* Language selector */}
           <Box sx={{ flexGrow: 0, mr: 2 }}>
@@ -194,18 +137,6 @@ export const Header = ({ toggleSidebar }: HeaderProps) => {
           <Box sx={{ flexGrow: 0 }}>
             {isAuthenticated ? (
               <>
-                {isAuthenticated && isMobile && (
-                  <IconButton
-                    size="large"
-                    edge="start"
-                    color="inherit"
-                    aria-label="open drawer"
-                    onClick={toggleSidebar}
-                    sx={{ mr: 2 }}
-                  >
-                    <MenuIcon />
-                  </IconButton>
-                )}
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                   {user?.avatar ? (
                     <Avatar alt={user.firstName} src={user.avatar} />
