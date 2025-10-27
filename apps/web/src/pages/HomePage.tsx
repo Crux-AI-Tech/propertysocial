@@ -5,6 +5,8 @@ import {
   Container,
   Typography,
   CircularProgress,
+  Tabs,
+  Tab,
 } from '@mui/material';
 
 import { PropertyCard } from '../components/property/PropertyCard';
@@ -21,6 +23,7 @@ const mockProperties = Array.from({ length: 12 }, (_, i) => ({
   bedrooms: Math.floor(Math.random() * 5) + 1,
   bathrooms: Math.floor(Math.random() * 3) + 1,
   size: Math.floor(Math.random() * 200) + 50,
+  energyRating: ['A+', 'A', 'B', 'C', 'D', 'E', 'F'][i % 7],
   location: {
     address: `${Math.floor(Math.random() * 100) + 1} Main Street`,
     city: ['Berlin', 'Paris', 'Madrid', 'Rome', 'Amsterdam'][i % 5],
@@ -49,6 +52,7 @@ export const HomePage = () => {
   const { t } = useTranslation(['common', 'property']);
   const [properties, setProperties] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [listingTypeFilter, setListingTypeFilter] = useState<'ALL' | 'SALE' | 'RENT'>('ALL');
 
   useEffect(() => {
     // Simulate loading properties
@@ -61,6 +65,15 @@ export const HomePage = () => {
 
     loadProperties();
   }, []);
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: 'ALL' | 'SALE' | 'RENT') => {
+    setListingTypeFilter(newValue);
+  };
+
+  // Filter properties based on selected tab
+  const filteredProperties = listingTypeFilter === 'ALL' 
+    ? properties 
+    : properties.filter(p => p.listingType === listingTypeFilter);
 
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', py: 2 }}>
@@ -75,6 +88,27 @@ export const HomePage = () => {
           </Typography>
         </Box>
 
+        {/* Listing Type Filter Tabs */}
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+          <Tabs 
+            value={listingTypeFilter} 
+            onChange={handleTabChange}
+            variant="fullWidth"
+            sx={{ 
+              px: 2,
+              '& .MuiTab-root': {
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '0.9375rem',
+              }
+            }}
+          >
+            <Tab label={t('property:listingTypes.all')} value="ALL" />
+            <Tab label={t('property:listingTypes.sale')} value="SALE" />
+            <Tab label={t('property:listingTypes.rent')} value="RENT" />
+          </Tabs>
+        </Box>
+
         {/* Property Feed */}
         {isLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
@@ -82,12 +116,22 @@ export const HomePage = () => {
           </Box>
         ) : (
           <Box>
-            {properties.map((property) => (
+            {filteredProperties.map((property) => (
               <PropertyCard
                 key={property.id}
                 property={property}
               />
             ))}
+            {filteredProperties.length === 0 && (
+              <Box sx={{ textAlign: 'center', py: 8, px: 2 }}>
+                <Typography variant="h6" gutterBottom>
+                  {t('property:search.noResults')}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {t('property:search.tryDifferentFilters')}
+                </Typography>
+              </Box>
+            )}
           </Box>
         )}
       </Container>
