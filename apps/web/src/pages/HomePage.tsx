@@ -23,7 +23,7 @@ const mockProperties = Array.from({ length: 12 }, (_, i) => ({
   bedrooms: Math.floor(Math.random() * 5) + 1,
   bathrooms: Math.floor(Math.random() * 3) + 1,
   size: Math.floor(Math.random() * 200) + 50,
-  energyRating: ['A+', 'A', 'B', 'C', 'D', 'E', 'F'][i % 7],
+  energyRating: ['A+', 'A', 'B', 'C', 'D', 'E', 'F', 'G'][i % 8],
   location: {
     address: `${Math.floor(Math.random() * 100) + 1} Main Street`,
     city: ['Berlin', 'Paris', 'Madrid', 'Rome', 'Amsterdam'][i % 5],

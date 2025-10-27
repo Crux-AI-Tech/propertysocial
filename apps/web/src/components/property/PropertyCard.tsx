@@ -159,7 +159,7 @@ export const PropertyCard = ({ property, isFavorite = false, onToggleFavorite }:
       <Box 
         component={RouterLink} 
         to={`/properties/${property.id}`}
-        onMouseEnter={() => activeFeatures.length > 0 && setShowFeatures(true)}
+        onMouseEnter={() => setShowFeatures(true)}
         onMouseLeave={() => setShowFeatures(false)}
         sx={{ 
           position: 'relative', 
@@ -216,7 +216,7 @@ export const PropertyCard = ({ property, isFavorite = false, onToggleFavorite }:
         )}
 
         {/* Property Features Overlay - Shows on hover */}
-        {activeFeatures.length > 0 && (
+        {activeFeatures.length > 0 && showFeatures && (
           <Fade in={showFeatures}>
             <Paper
               elevation={3}
