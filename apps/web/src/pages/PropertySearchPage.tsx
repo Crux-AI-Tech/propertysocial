@@ -54,14 +54,14 @@ const mockProperties = Array.from({ length: 20 }, (_, i) => ({
   location: {
     address: `${Math.floor(Math.random() * 100) + 1} Main Street`,
     city: ['Berlin', 'Paris', 'Madrid', 'Rome', 'Amsterdam'][i % 5],
-    country: ['DE', 'FR', 'ES', 'IT', 'NL'][i % 5],
+    country: ['Germany', 'France', 'Spain', 'Italy', 'Netherlands'][i % 5],
     lat: 48.8566 + (Math.random() - 0.5) * 2,
     lng: 2.3522 + (Math.random() - 0.5) * 2,
   },
   images: [
-    `https://picsum.photos/seed/${i + 1}/800/600`,
-    `https://picsum.photos/seed/${i + 10}/800/600`,
-    `https://picsum.photos/seed/${i + 20}/800/600`,
+    `https://picsum.photos/seed/${i + 1}/800/800`,
+    `https://picsum.photos/seed/${i + 10}/800/800`,
+    `https://picsum.photos/seed/${i + 20}/800/800`,
   ],
   features: {
     garden: i % 3 === 0,
@@ -73,9 +73,10 @@ const mockProperties = Array.from({ length: 20 }, (_, i) => ({
   createdAt: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toISOString(),
   agent: {
     id: `agent-${i % 5 + 1}`,
-    name: `Agent ${i % 5 + 1}`,
+    name: ['Sarah Johnson', 'Michael Brown', 'Emma Wilson', 'James Davis', 'Olivia Martinez'][i % 5],
     phone: '+1234567890',
     email: `agent${i % 5 + 1}@example.com`,
+    avatar: `https://i.pravatar.cc/150?img=${(i % 10) + 1}`,
   },
 }));
 
@@ -448,7 +449,7 @@ export const PropertySearchPage = () => {
             </Alert>
           )}
 
-          {/* Property list view */}
+          {/* Property list view - Instagram feed style */}
           {viewMode === 'list' ? (
             <>
               {isLoading ? (
@@ -456,13 +457,11 @@ export const PropertySearchPage = () => {
                   <CircularProgress />
                 </Box>
               ) : properties.length > 0 ? (
-                <Grid container spacing={3}>
+                <Box sx={{ maxWidth: filtersOpen ? '100%' : 600, mx: 'auto' }}>
                   {properties.map((property) => (
-                    <Grid item xs={12} sm={6} md={filtersOpen ? 6 : 4} key={property.id}>
-                      <PropertyCard property={property} />
-                    </Grid>
+                    <PropertyCard key={property.id} property={property} />
                   ))}
-                </Grid>
+                </Box>
               ) : (
                 <Box sx={{ textAlign: 'center', py: 8 }}>
                   <Typography variant="h6" gutterBottom>
