@@ -4,22 +4,19 @@ import { useTranslation } from 'react-i18next';
 import {
   Box,
   Card,
-  CardActionArea,
-  CardContent,
-  CardMedia,
-  Chip,
+  Avatar,
   IconButton,
   Typography,
   Skeleton,
-  Tooltip,
 } from '@mui/material';
 import {
   Favorite,
   FavoriteBorder,
-  BedOutlined,
-  BathtubOutlined,
-  SquareFootOutlined,
-  LocationOn,
+  ChatBubbleOutline,
+  ShareOutlined,
+  BookmarkBorder,
+  Bookmark,
+  MoreVert,
 } from '@mui/icons-material';
 
 interface PropertyCardProps {
@@ -39,6 +36,10 @@ interface PropertyCardProps {
     };
     images: string[];
     features?: Record<string, boolean>;
+    agent?: {
+      name?: string;
+      avatar?: string;
+    };
   };
   isFavorite?: boolean;
   onToggleFavorite?: (id: string) => void;
@@ -48,6 +49,7 @@ export const PropertyCard = ({ property, isFavorite = false, onToggleFavorite }:
   const { t } = useTranslation(['property', 'common']);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [localFavorite, setLocalFavorite] = useState(isFavorite);
+  const [localSaved, setLocalSaved] = useState(false);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -56,6 +58,12 @@ export const PropertyCard = ({ property, isFavorite = false, onToggleFavorite }:
     if (onToggleFavorite) {
       onToggleFavorite(property.id);
     }
+  };
+
+  const handleSaveClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setLocalSaved(!localSaved);
   };
 
   // Format price based on currency
@@ -69,190 +77,167 @@ export const PropertyCard = ({ property, isFavorite = false, onToggleFavorite }:
 
   return (
     <Card 
-      elevation={2} 
       className="property-card"
       sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'relative',
-        overflow: 'hidden',
-        borderRadius: 2,
+        maxWidth: 600,
+        mx: 'auto',
+        mb: 3,
+        bgcolor: 'background.paper',
       }}
     >
-      <CardActionArea 
+      {/* Header - Instagram style with avatar and location */}
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        p: 1.5,
+        borderBottom: '1px solid #efefef'
+      }}>
+        <Avatar
+          src={property.agent?.avatar || `https://i.pravatar.cc/150?u=${property.id}`}
+          sx={{ width: 32, height: 32, mr: 1.5 }}
+        />
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+            {property.agent?.name || 'Property Agent'}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+            {property.location.city}, {property.location.country}
+          </Typography>
+        </Box>
+        <IconButton size="small">
+          <MoreVert fontSize="small" />
+        </IconButton>
+      </Box>
+
+      {/* Property image - Full width, square aspect ratio like Instagram */}
+      <Box 
         component={RouterLink} 
         to={`/properties/${property.id}`}
         sx={{ 
-          flexGrow: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'stretch',
-          height: '100%',
+          position: 'relative', 
+          paddingTop: '100%', /* 1:1 aspect ratio */
+          display: 'block',
+          textDecoration: 'none',
         }}
       >
-        {/* Property image */}
-        <Box sx={{ position: 'relative', paddingTop: '56.25%' /* 16:9 aspect ratio */ }}>
-          {!imageLoaded && (
-            <Skeleton 
-              variant="rectangular" 
-              sx={{ 
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-              }} 
-            />
-          )}
-          <CardMedia
-            component="img"
-            image={property.images[0]}
-            alt={property.title}
-            onLoad={() => setImageLoaded(true)}
-            sx={{
+        {!imageLoaded && (
+          <Skeleton 
+            variant="rectangular" 
+            sx={{ 
               position: 'absolute',
               top: 0,
               left: 0,
               width: '100%',
               height: '100%',
-              objectFit: 'cover',
-              display: imageLoaded ? 'block' : 'none',
-            }}
+            }} 
           />
-          
-          {/* Property type and listing type badges */}
-          <Box sx={{ position: 'absolute', top: 12, left: 12, display: 'flex', gap: 1 }}>
-            <Chip
-              label={t(`property:types.${property.propertyType.toLowerCase()}`)}
-              size="small"
-              color="primary"
-              sx={{ 
-                bgcolor: 'rgba(25, 118, 210, 0.8)',
-                fontWeight: 'bold',
-              }}
-            />
-            <Chip
-              label={t(`property:listingTypes.${property.listingType.toLowerCase()}`)}
-              size="small"
-              color={property.listingType === 'SALE' ? 'secondary' : 'success'}
-              sx={{ 
-                bgcolor: property.listingType === 'SALE' 
-                  ? 'rgba(245, 0, 87, 0.8)' 
-                  : 'rgba(76, 175, 80, 0.8)',
-                fontWeight: 'bold',
-              }}
-            />
-          </Box>
-          
-          {/* Favorite button */}
-          <Box sx={{ position: 'absolute', top: 12, right: 12 }}>
-            <IconButton
-              aria-label={localFavorite ? t('property:card.removeFromFavorites') : t('property:card.addToFavorites')}
-              onClick={handleFavoriteClick}
-              sx={{
-                bgcolor: 'rgba(255, 255, 255, 0.8)',
-                '&:hover': {
-                  bgcolor: 'rgba(255, 255, 255, 0.9)',
-                },
-              }}
-            >
-              {localFavorite ? (
-                <Favorite color="error" />
-              ) : (
-                <FavoriteBorder />
-              )}
-            </IconButton>
-          </Box>
-        </Box>
-        
-        {/* Property details */}
-        <CardContent sx={{ flexGrow: 1, p: 2 }}>
-          {/* Price */}
-          <Typography variant="h5" component="div" gutterBottom fontWeight="bold">
-            {formatPrice(property.price, property.currency)}
-            {property.listingType === 'RENT' && (
-              <Typography variant="body2" component="span" color="text.secondary">
-                {' '}{t('property:card.perMonth')}
-              </Typography>
-            )}
-          </Typography>
-          
-          {/* Title */}
-          <Typography 
-            variant="h6" 
-            component="h2" 
-            gutterBottom
-            sx={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              lineHeight: 1.2,
-              height: '2.4em',
-            }}
+        )}
+        <Box
+          component="img"
+          src={property.images[0]}
+          alt={property.title}
+          onLoad={() => setImageLoaded(true)}
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: imageLoaded ? 'block' : 'none',
+          }}
+        />
+      </Box>
+
+      {/* Action buttons - Instagram style */}
+      <Box sx={{ p: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+          <IconButton 
+            size="medium" 
+            onClick={handleFavoriteClick}
+            sx={{ p: 0.5, mr: 1 }}
           >
+            {localFavorite ? (
+              <Favorite sx={{ color: '#ed4956', fontSize: 28 }} />
+            ) : (
+              <FavoriteBorder sx={{ fontSize: 28 }} />
+            )}
+          </IconButton>
+          <IconButton 
+            component={RouterLink}
+            to={`/properties/${property.id}`}
+            size="medium"
+            sx={{ p: 0.5, mr: 1 }}
+          >
+            <ChatBubbleOutline sx={{ fontSize: 28 }} />
+          </IconButton>
+          <IconButton size="medium" sx={{ p: 0.5 }}>
+            <ShareOutlined sx={{ fontSize: 28 }} />
+          </IconButton>
+          <Box sx={{ flex: 1 }} />
+          <IconButton 
+            size="medium" 
+            onClick={handleSaveClick}
+            sx={{ p: 0.5 }}
+          >
+            {localSaved ? (
+              <Bookmark sx={{ fontSize: 28 }} />
+            ) : (
+              <BookmarkBorder sx={{ fontSize: 28 }} />
+            )}
+          </IconButton>
+        </Box>
+
+        {/* Price and title */}
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5, fontSize: '0.9375rem' }}>
+          {formatPrice(property.price, property.currency)}
+          {property.listingType === 'RENT' && (
+            <Typography variant="body2" component="span" color="text.secondary" sx={{ ml: 0.5 }}>
+              / {t('property:card.perMonth')}
+            </Typography>
+          )}
+        </Typography>
+        
+        {/* Description */}
+        <Typography variant="body2" color="text.primary" sx={{ mb: 0.5, fontSize: '0.875rem' }}>
+          <Typography component="span" sx={{ fontWeight: 600, mr: 0.5 }}>
             {property.title}
           </Typography>
-          
-          {/* Location */}
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-            <LocationOn fontSize="small" color="action" sx={{ mr: 0.5 }} />
-            <Typography variant="body2" color="text.secondary">
-              {property.location.city}, {property.location.country}
-            </Typography>
-          </Box>
-          
-          {/* Features */}
-          <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-            {property.bedrooms !== undefined && (
-              <Tooltip title={t('property:features.bedrooms')}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <BedOutlined fontSize="small" color="action" sx={{ mr: 0.5 }} />
-                  <Typography variant="body2">{property.bedrooms}</Typography>
-                </Box>
-              </Tooltip>
-            )}
-            
-            {property.bathrooms !== undefined && (
-              <Tooltip title={t('property:features.bathrooms')}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <BathtubOutlined fontSize="small" color="action" sx={{ mr: 0.5 }} />
-                  <Typography variant="body2">{property.bathrooms}</Typography>
-                </Box>
-              </Tooltip>
-            )}
-            
-            {property.size !== undefined && (
-              <Tooltip title={t('property:features.size')}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <SquareFootOutlined fontSize="small" color="action" sx={{ mr: 0.5 }} />
-                  <Typography variant="body2">{property.size} m²</Typography>
-                </Box>
-              </Tooltip>
-            )}
-          </Box>
-          
-          {/* Features tags */}
-          {property.features && (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 2 }}>
-              {Object.entries(property.features)
-                .filter(([_, value]) => value)
-                .slice(0, 3)
-                .map(([key]) => (
-                  <Chip
-                    key={key}
-                    label={t(`property:features.${key}`)}
-                    size="small"
-                    variant="outlined"
-                    sx={{ fontSize: '0.7rem' }}
-                  />
-                ))}
-            </Box>
-          )}
-        </CardContent>
-      </CardActionArea>
+        </Typography>
+
+        {/* Property details */}
+        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+          {[
+            property.bedrooms && `${property.bedrooms} ${t('property:features.bedrooms')}`,
+            property.bathrooms && `${property.bathrooms} ${t('property:features.bathrooms')}`,
+            property.size && `${property.size}m²`,
+          ].filter(Boolean).join(' • ')}
+        </Typography>
+
+        {/* Property type badge */}
+        <Box sx={{ mt: 1, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+          <Typography 
+            variant="caption" 
+            sx={{ 
+              color: 'primary.main',
+              fontWeight: 600,
+              fontSize: '0.75rem'
+            }}
+          >
+            #{t(`property:types.${property.propertyType.toLowerCase()}`)}
+          </Typography>
+          <Typography 
+            variant="caption" 
+            sx={{ 
+              color: property.listingType === 'SALE' ? 'secondary.main' : 'success.main',
+              fontWeight: 600,
+              fontSize: '0.75rem'
+            }}
+          >
+            #{t(`property:listingTypes.${property.listingType.toLowerCase()}`)}
+          </Typography>
+        </Box>
+      </Box>
     </Card>
   );
 };

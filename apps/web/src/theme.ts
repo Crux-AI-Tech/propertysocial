@@ -1,68 +1,77 @@
 import { createTheme, responsiveFontSizes } from '@mui/material/styles';
 
-// Create a theme instance
+// Create a theme instance - Instagram-style modern design
 let theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
-      light: '#42a5f5',
-      dark: '#1565c0',
+      main: '#0095f6', // Instagram blue
+      light: '#4db5ff',
+      dark: '#0066c3',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#f50057',
-      light: '#ff4081',
-      dark: '#c51162',
+      main: '#ed4956', // Instagram red/pink
+      light: '#ff7b85',
+      dark: '#c13584',
       contrastText: '#ffffff',
     },
     error: {
-      main: '#f44336',
+      main: '#ed4956',
     },
     warning: {
-      main: '#ff9800',
+      main: '#ffc107',
     },
     info: {
-      main: '#2196f3',
+      main: '#0095f6',
     },
     success: {
-      main: '#4caf50',
+      main: '#00d084',
     },
     background: {
-      default: '#f5f5f5',
+      default: '#fafafa', // Instagram light gray
       paper: '#ffffff',
     },
     text: {
-      primary: '#212121',
-      secondary: '#757575',
+      primary: '#262626', // Instagram dark text
+      secondary: '#8e8e8e', // Instagram gray text
     },
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
     h1: {
       fontWeight: 700,
+      letterSpacing: '-0.02em',
     },
     h2: {
-      fontWeight: 600,
+      fontWeight: 700,
+      letterSpacing: '-0.02em',
     },
     h3: {
       fontWeight: 600,
+      letterSpacing: '-0.01em',
     },
     h4: {
       fontWeight: 600,
     },
     h5: {
-      fontWeight: 500,
+      fontWeight: 600,
     },
     h6: {
-      fontWeight: 500,
+      fontWeight: 600,
     },
     button: {
-      fontWeight: 500,
+      fontWeight: 600,
       textTransform: 'none',
+    },
+    body1: {
+      fontSize: '0.9375rem', // 15px - Instagram size
+    },
+    body2: {
+      fontSize: '0.875rem', // 14px
     },
   },
   shape: {
-    borderRadius: 8,
+    borderRadius: 12,
   },
   components: {
     MuiButton: {
@@ -71,20 +80,29 @@ let theme = createTheme({
           borderRadius: 8,
           padding: '8px 16px',
           boxShadow: 'none',
+          fontWeight: 600,
           '&:hover': {
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+            boxShadow: 'none',
+            opacity: 0.9,
           },
         },
         contained: {
-          boxShadow: '0 1px 4px rgba(0, 0, 0, 0.1)',
+          boxShadow: 'none',
+          '&:hover': {
+            boxShadow: 'none',
+          },
+        },
+        outlined: {
+          borderWidth: 1,
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
-          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+          borderRadius: 0, // Instagram uses no rounded corners on cards
+          boxShadow: 'none',
+          border: '1px solid #dbdbdb',
         },
       },
     },
@@ -92,7 +110,8 @@ let theme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            borderRadius: 8,
+            borderRadius: 3,
+            backgroundColor: '#fafafa',
           },
         },
       },
@@ -100,14 +119,26 @@ let theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
+          boxShadow: 'none',
+          borderBottom: '1px solid #dbdbdb',
+          backgroundColor: '#ffffff',
         },
       },
     },
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: 16,
+          borderRadius: 4,
+          fontWeight: 600,
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+          },
         },
       },
     },

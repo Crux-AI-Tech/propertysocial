@@ -4,47 +4,24 @@ import { useTranslation } from 'react-i18next';
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Chip,
   Container,
-  Divider,
-  Grid,
   IconButton,
-  Paper,
   Typography,
-  Tabs,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
   CircularProgress,
   Alert,
-  useMediaQuery,
-  useTheme,
 } from '@mui/material';
 import {
   Favorite,
   FavoriteBorder,
   Share,
-  BedOutlined,
-  BathtubOutlined,
-  SquareFootOutlined,
   LocationOn,
-  CalendarToday,
   ArrowBack,
-  Check,
-  Close,
-  Print,
-  Home,
   ChevronLeft,
   ChevronRight,
 } from '@mui/icons-material';
 
 import { PropertyMap } from '../components/property/PropertyMap';
-import { PropertySocialShare } from '../components/social';
 
 // Mock property data
 const mockProperty = {
@@ -109,39 +86,14 @@ const mockProperty = {
   },
 };
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`property-tabpanel-${index}`}
-      aria-labelledby={`property-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
-    </div>
-  );
-}
-
 export const PropertyDetailsPage = () => {
   const { t } = useTranslation(['property', 'common']);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { id } = useParams<{ id: string }>();
   const [property, setProperty] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
-  const [tabValue, setTabValue] = useState(0);
 
   // Fetch property data
   useEffect(() => {
@@ -165,11 +117,6 @@ export const PropertyDetailsPage = () => {
     
     fetchProperty();
   }, [id, t]);
-
-  // Handle tab change
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
 
   // Toggle favorite
   const handleToggleFavorite = () => {
@@ -233,411 +180,282 @@ export const PropertyDetailsPage = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Breadcrumbs */}
-      <Box sx={{ display: 'flex', mb: 2 }}>
-        <Button
-          component={RouterLink}
-          to="/search"
-          startIcon={<ArrowBack />}
-          sx={{ mr: 2 }}
-        >
-          {t('property:details.backToSearch')}
-        </Button>
-        <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-          <Home fontSize="small" sx={{ mr: 0.5 }} />
-          {property.location.city}, {property.location.country}
-        </Typography>
-      </Box>
-
-      <Grid container spacing={4}>
-        {/* Property images */}
-        <Grid item xs={12} md={8}>
-          <Box sx={{ position: 'relative', borderRadius: 2, overflow: 'hidden', mb: 2 }}>
-            <Box
-              component="img"
-              src={property.images[activeImage]}
-              alt={property.title}
-              sx={{
-                width: '100%',
-                height: { xs: 300, sm: 400, md: 500 },
-                objectFit: 'cover',
-                borderRadius: 2,
-              }}
-            />
-            
-            {/* Image navigation */}
-            <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, p: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <IconButton
-                  onClick={handlePrevImage}
-                  sx={{
-                    bgcolor: 'rgba(255, 255, 255, 0.8)',
-                    '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.9)' },
-                  }}
-                >
-                  <ChevronLeft />
-                </IconButton>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    bgcolor: 'rgba(0, 0, 0, 0.7)',
-                    color: 'white',
-                    px: 2,
-                    py: 0.5,
-                    borderRadius: 1,
-                  }}
-                >
-                  {activeImage + 1} / {property.images.length}
-                </Typography>
-                <IconButton
-                  onClick={handleNextImage}
-                  sx={{
-                    bgcolor: 'rgba(255, 255, 255, 0.8)',
-                    '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.9)' },
-                  }}
-                >
-                  <ChevronRight />
-                </IconButton>
-              </Box>
-            </Box>
+    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
+      <Container maxWidth="sm" disableGutters>
+        {/* Instagram-style Header */}
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          p: 1.5,
+          bgcolor: 'background.paper',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        }}>
+          <IconButton
+            component={RouterLink}
+            to="/search"
+            sx={{ mr: 1 }}
+          >
+            <ArrowBack />
+          </IconButton>
+          <Box
+            component="img"
+            src={property.agent.avatar}
+            alt={property.agent.name}
+            sx={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              mr: 1.5,
+            }}
+          />
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.875rem' }}>
+              {property.agent.name}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+              {property.location.city}, {property.location.country}
+            </Typography>
           </Box>
+        </Box>
+
+        {/* Full-width image carousel */}
+        <Box sx={{ position: 'relative', bgcolor: 'black' }}>
+          <Box
+            component="img"
+            src={property.images[activeImage]}
+            alt={property.title}
+            sx={{
+              width: '100%',
+              height: { xs: 400, sm: 500, md: 600 },
+              objectFit: 'contain',
+              bgcolor: 'black',
+            }}
+          />
           
-          {/* Thumbnail gallery */}
-          <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 1 }}>
-            {property.images.map((image: string, index: number) => (
-              <Box
-                key={index}
-                component="img"
-                src={image}
-                alt={`Thumbnail ${index + 1}`}
-                onClick={() => setActiveImage(index)}
+          {/* Image dots indicator */}
+          {property.images.length > 1 && (
+            <Box 
+              sx={{ 
+                position: 'absolute',
+                bottom: 16,
+                left: 0,
+                right: 0,
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 0.5,
+              }}
+            >
+              {property.images.map((_: string, index: number) => (
+                <Box
+                  key={index}
+                  sx={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    bgcolor: index === activeImage ? 'white' : 'rgba(255, 255, 255, 0.5)',
+                    transition: 'all 0.2s',
+                  }}
+                />
+              ))}
+            </Box>
+          )}
+          
+          {/* Prev/Next buttons */}
+          {property.images.length > 1 && (
+            <>
+              <IconButton
+                onClick={handlePrevImage}
                 sx={{
-                  width: 80,
-                  height: 60,
-                  objectFit: 'cover',
-                  borderRadius: 1,
-                  cursor: 'pointer',
-                  border: index === activeImage ? `2px solid ${theme.palette.primary.main}` : 'none',
-                  opacity: index === activeImage ? 1 : 0.7,
-                  transition: 'all 0.2s',
-                  '&:hover': {
-                    opacity: 1,
-                  },
+                  position: 'absolute',
+                  left: 8,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  bgcolor: 'rgba(255, 255, 255, 0.8)',
+                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.95)' },
                 }}
+              >
+                <ChevronLeft />
+              </IconButton>
+              <IconButton
+                onClick={handleNextImage}
+                sx={{
+                  position: 'absolute',
+                  right: 8,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  bgcolor: 'rgba(255, 255, 255, 0.8)',
+                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.95)' },
+                }}
+              >
+                <ChevronRight />
+              </IconButton>
+            </>
+          )}
+        </Box>
+
+        {/* Instagram-style action buttons */}
+        <Box sx={{ p: 1.5, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+            <IconButton 
+              size="medium" 
+              onClick={handleToggleFavorite}
+              sx={{ p: 0.5, mr: 1 }}
+            >
+              {isFavorite ? (
+                <Favorite sx={{ color: '#ed4956', fontSize: 28 }} />
+              ) : (
+                <FavoriteBorder sx={{ fontSize: 28 }} />
+              )}
+            </IconButton>
+            <IconButton size="medium" sx={{ p: 0.5, mr: 1 }}>
+              <Share sx={{ fontSize: 28 }} />
+            </IconButton>
+            <Box sx={{ flex: 1 }} />
+            <Button
+              variant="contained"
+              onClick={() => window.open(`tel:${property.agent.phone}`)}
+              sx={{ borderRadius: 8, px: 3 }}
+            >
+              {t('property:details.contact')}
+            </Button>
+          </Box>
+
+          {/* Price and title */}
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
+            {formatPrice(property.price, property.currency)}
+            {property.listingType === 'RENT' && (
+              <Typography variant="body1" component="span" color="text.secondary" sx={{ ml: 0.5 }}>
+                / {t('property:card.perMonth')}
+              </Typography>
+            )}
+          </Typography>
+          
+          <Typography variant="body1" sx={{ mb: 1, fontWeight: 600 }}>
+            {property.title}
+          </Typography>
+
+          {/* Property details in compact format */}
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            {[
+              property.bedrooms && `${property.bedrooms} ${t('property:details.bedrooms')}`,
+              property.bathrooms && `${property.bathrooms} ${t('property:details.bathrooms')}`,
+              property.size && `${property.size}m²`,
+              property.yearBuilt && `Built ${property.yearBuilt}`,
+            ].filter(Boolean).join(' • ')}
+          </Typography>
+
+          {/* Property type badges as hashtags */}
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+            <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 600 }}>
+              #{t(`property:types.${property.propertyType.toLowerCase()}`).replace(' ', '')}
+            </Typography>
+            <Typography variant="body2" sx={{ color: property.listingType === 'SALE' ? 'secondary.main' : 'success.main', fontWeight: 600 }}>
+              #{t(`property:listingTypes.${property.listingType.toLowerCase()}`)}
+            </Typography>
+            {property.energyRating && (
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                #Energy{property.energyRating}
+              </Typography>
+            )}
+          </Box>
+
+          {/* Description */}
+          <Typography variant="body2" color="text.primary" sx={{ whiteSpace: 'pre-line', mb: 2 }}>
+            {property.description}
+          </Typography>
+
+          {/* Posted date */}
+          <Typography variant="caption" color="text.secondary">
+            {t('property:details.listedDate')}: {formatDate(property.createdAt)}
+          </Typography>
+        </Box>
+
+        {/* Features Section */}
+        <Box sx={{ p: 2, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            {t('property:details.features')}
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {property.amenities.map((amenity: string) => (
+              <Chip
+                key={amenity}
+                label={amenity}
+                size="small"
+                variant="outlined"
               />
             ))}
           </Box>
-        </Grid>
+        </Box>
 
-        {/* Property details */}
-        <Grid item xs={12} md={4}>
-          <Card elevation={2} sx={{ mb: 3, borderRadius: 2 }}>
-            <CardContent>
-              {/* Price and type */}
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="h4" component="div" fontWeight="bold">
-                  {formatPrice(property.price, property.currency)}
-                  {property.listingType === 'RENT' && (
-                    <Typography variant="body1" component="span" color="text.secondary">
-                      {' '}{t('property:card.perMonth')}
-                    </Typography>
-                  )}
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                  <Chip
-                    label={t(`property:types.${property.propertyType.toLowerCase()}`)}
-                    color="primary"
-                    size="small"
-                  />
-                  <Chip
-                    label={t(`property:listingTypes.${property.listingType.toLowerCase()}`)}
-                    color={property.listingType === 'SALE' ? 'secondary' : 'success'}
-                    size="small"
-                  />
-                </Box>
-              </Box>
-
-              {/* Key features */}
-              <Box sx={{ display: 'flex', gap: 3, mb: 3 }}>
-                {property.bedrooms !== undefined && (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <BedOutlined color="action" />
-                    <Typography variant="body2" color="text.secondary">
-                      {property.bedrooms} {t('property:features.bedrooms')}
-                    </Typography>
-                  </Box>
-                )}
-                
-                {property.bathrooms !== undefined && (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <BathtubOutlined color="action" />
-                    <Typography variant="body2" color="text.secondary">
-                      {property.bathrooms} {t('property:features.bathrooms')}
-                    </Typography>
-                  </Box>
-                )}
-                
-                {property.size !== undefined && (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <SquareFootOutlined color="action" />
-                    <Typography variant="body2" color="text.secondary">
-                      {property.size} m²
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-
-              {/* Location */}
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  {t('property:details.location')}
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                  <LocationOn color="action" sx={{ mr: 1, mt: 0.3 }} />
-                  <Typography variant="body2">
-                    {property.location.address}<br />
-                    {property.location.postcode} {property.location.city}<br />
-                    {property.location.country}
-                  </Typography>
-                </Box>
-              </Box>
-
-              {/* Listed date */}
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  {t('property:details.listedDate')}
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <CalendarToday color="action" sx={{ mr: 1, fontSize: 'small' }} />
-                  <Typography variant="body2">
-                    {formatDate(property.createdAt)}
-                  </Typography>
-                </Box>
-              </Box>
-
-              {/* Action buttons */}
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Button
-                  variant="contained"
-                  fullWidth
-                  onClick={() => window.open(`tel:${property.agent.phone}`)}
-                >
-                  {t('property:details.contact')}
-                </Button>
-                <IconButton
-                  aria-label={isFavorite ? t('property:card.removeFromFavorites') : t('property:card.addToFavorites')}
-                  onClick={handleToggleFavorite}
-                  sx={{
-                    border: 1,
-                    borderColor: 'divider',
-                  }}
-                >
-                  {isFavorite ? <Favorite color="error" /> : <FavoriteBorder />}
-                </IconButton>
-                <PropertySocialShare
-                  property={property}
-                  variant="menu"
-                  size="medium"
-                  showAnalytics={true}
-                />
-              </Box>
-            </CardContent>
-          </Card>
-
-          {/* Agent card */}
-          <Card elevation={2} sx={{ borderRadius: 2 }}>
-            <CardContent>
-              <Typography variant="subtitle1" gutterBottom>
-                {t('property:details.listedBy')}
+        {/* Location Section */}
+        <Box sx={{ p: 2, bgcolor: 'background.paper', mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            {t('property:details.location')}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 2 }}>
+            <LocationOn color="action" sx={{ mr: 1, mt: 0.3 }} />
+            <Box>
+              <Typography variant="body2">
+                {property.location.address}<br />
+                {property.location.postcode} {property.location.city}<br />
+                {property.location.country}
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Box
-                  component="img"
-                  src={property.agent.avatar}
-                  alt={property.agent.name}
-                  sx={{
-                    width: 50,
-                    height: 50,
-                    borderRadius: '50%',
-                    mr: 2,
-                  }}
-                />
-                <Box>
-                  <Typography variant="subtitle2">
-                    {property.agent.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {property.agent.company}
-                  </Typography>
-                </Box>
-              </Box>
-              <Button
-                variant="outlined"
-                fullWidth
-                sx={{ mb: 1 }}
-                onClick={() => window.open(`mailto:${property.agent.email}`)}
-              >
-                {t('property:details.email')}
-              </Button>
-              <Button
-                variant="outlined"
-                fullWidth
-                onClick={() => window.open(`tel:${property.agent.phone}`)}
-              >
-                {t('property:details.call')}
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Tabs section */}
-        <Grid item xs={12}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs
-              value={tabValue}
-              onChange={handleTabChange}
-              aria-label="property details tabs"
-              variant="scrollable"
-              scrollButtons="auto"
-            >
-              <Tab label={t('property:details.tabs.description')} id="property-tab-0" aria-controls="property-tabpanel-0" />
-              <Tab label={t('property:details.tabs.features')} id="property-tab-1" aria-controls="property-tabpanel-1" />
-              <Tab label={t('property:details.tabs.location')} id="property-tab-2" aria-controls="property-tabpanel-2" />
-            </Tabs>
-          </Box>
-
-          {/* Description tab */}
-          <TabPanel value={tabValue} index={0}>
-            <Typography variant="body1" paragraph>
-              {property.description.split('\n\n').map((paragraph: string, index: number) => (
-                <Typography key={index} variant="body1" paragraph>
-                  {paragraph}
-                </Typography>
-              ))}
-            </Typography>
-          </TabPanel>
-
-          {/* Features tab */}
-          <TabPanel value={tabValue} index={1}>
-            <Grid container spacing={4}>
-              <Grid item xs={12} md={6}>
-                <Typography variant="h6" gutterBottom>
-                  {t('property:details.propertyDetails')}
-                </Typography>
-                <TableContainer component={Paper} variant="outlined">
-                  <Table>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell component="th" scope="row">
-                          {t('property:details.propertyType')}
-                        </TableCell>
-                        <TableCell>
-                          {t(`property:types.${property.propertyType.toLowerCase()}`)}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell component="th" scope="row">
-                          {t('property:details.bedrooms')}
-                        </TableCell>
-                        <TableCell>{property.bedrooms}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell component="th" scope="row">
-                          {t('property:details.bathrooms')}
-                        </TableCell>
-                        <TableCell>{property.bathrooms}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell component="th" scope="row">
-                          {t('property:details.size')}
-                        </TableCell>
-                        <TableCell>{property.size} m²</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell component="th" scope="row">
-                          {t('property:details.yearBuilt')}
-                        </TableCell>
-                        <TableCell>{property.yearBuilt}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell component="th" scope="row">
-                          {t('property:details.energyRating')}
-                        </TableCell>
-                        <TableCell>{property.energyRating}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell component="th" scope="row">
-                          {t('property:details.heating')}
-                        </TableCell>
-                        <TableCell>{property.features.heating}</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Typography variant="h6" gutterBottom>
-                  {t('property:details.features')}
-                </Typography>
-                <TableContainer component={Paper} variant="outlined">
-                  <Table>
-                    <TableBody>
-                      {Object.entries(property.features)
-                        .filter(([key]) => typeof property.features[key] === 'boolean')
-                        .map(([key, value]) => (
-                          <TableRow key={key}>
-                            <TableCell component="th" scope="row">
-                              {t(`property:features.${key}`)}
-                            </TableCell>
-                            <TableCell>
-                              {value ? (
-                                <Check color="success" />
-                              ) : (
-                                <Close color="error" />
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-
-                <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
-                  {t('property:details.amenities')}
-                </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {property.amenities.map((amenity: string) => (
-                    <Chip
-                      key={amenity}
-                      label={amenity}
-                      variant="outlined"
-                      size="small"
-                    />
-                  ))}
-                </Box>
-              </Grid>
-            </Grid>
-          </TabPanel>
-
-          {/* Location tab */}
-          <TabPanel value={tabValue} index={2}>
-            <Box sx={{ height: 400, width: '100%', mb: 3 }}>
-              <PropertyMap
-                properties={[property]}
-                center={[property.location.lat, property.location.lng]}
-                zoom={15}
-              />
             </Box>
-            <Typography variant="body1" paragraph>
-              {t('property:details.locationDescription', {
-                city: property.location.city,
-                country: property.location.country,
-              })}
-            </Typography>
-          </TabPanel>
-        </Grid>
-      </Grid>
-    </Container>
+          </Box>
+          <Box sx={{ height: 300, width: '100%', borderRadius: 2, overflow: 'hidden' }}>
+            <PropertyMap
+              properties={[property]}
+              center={[property.location.lat, property.location.lng]}
+              zoom={15}
+            />
+          </Box>
+        </Box>
+
+        {/* Agent Card */}
+        <Box sx={{ p: 2, bgcolor: 'background.paper', borderTop: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+            {t('property:details.listedBy')}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Box
+              component="img"
+              src={property.agent.avatar}
+              alt={property.agent.name}
+              sx={{
+                width: 56,
+                height: 56,
+                borderRadius: '50%',
+                mr: 2,
+              }}
+            />
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                {property.agent.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {property.agent.company}
+              </Typography>
+            </Box>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="outlined"
+              fullWidth
+              onClick={() => window.open(`mailto:${property.agent.email}`)}
+            >
+              {t('property:details.email')}
+            </Button>
+            <Button
+              variant="outlined"
+              fullWidth
+              onClick={() => window.open(`tel:${property.agent.phone}`)}
+            >
+              {t('property:details.call')}
+            </Button>
+          </Box>
+        </Box>
+      </Container>
+    </Box>
   );
 };
