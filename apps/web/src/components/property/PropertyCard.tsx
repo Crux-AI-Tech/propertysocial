@@ -8,6 +8,9 @@ import {
   IconButton,
   Typography,
   Skeleton,
+  Chip,
+  Fade,
+  Paper,
 } from '@mui/material';
 import {
   Favorite,
@@ -17,6 +20,13 @@ import {
   BookmarkBorder,
   Bookmark,
   MoreVert,
+  CheckCircle,
+  LocalParking,
+  Deck,
+  Elevator,
+  Yard,
+  Weekend,
+  Pets,
 } from '@mui/icons-material';
 
 interface PropertyCardProps {
@@ -30,6 +40,7 @@ interface PropertyCardProps {
     bedrooms?: number;
     bathrooms?: number;
     size?: number;
+    energyRating?: string;
     location: {
       city: string;
       country: string;
@@ -50,6 +61,7 @@ export const PropertyCard = ({ property, isFavorite = false, onToggleFavorite }:
   const [imageLoaded, setImageLoaded] = useState(false);
   const [localFavorite, setLocalFavorite] = useState(isFavorite);
   const [localSaved, setLocalSaved] = useState(false);
+  const [showFeatures, setShowFeatures] = useState(false);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -74,6 +86,40 @@ export const PropertyCard = ({ property, isFavorite = false, onToggleFavorite }:
       maximumFractionDigits: 0,
     }).format(price);
   };
+
+  // Get energy rating color based on rating
+  const getEnergyRatingColor = (rating?: string) => {
+    if (!rating) return '#808080';
+    const ratingUpper = rating.toUpperCase();
+    if (ratingUpper.includes('A')) return '#00A651'; // Green
+    if (ratingUpper === 'B') return '#4FB848'; // Light green
+    if (ratingUpper === 'C') return '#BED630'; // Yellow-green
+    if (ratingUpper === 'D') return '#FFF200'; // Yellow
+    if (ratingUpper === 'E') return '#FDB913'; // Orange
+    if (ratingUpper === 'F') return '#F37021'; // Dark orange
+    if (ratingUpper === 'G') return '#ED1C24'; // Red
+    return '#808080'; // Gray for unknown
+  };
+
+  // Get feature icon
+  const getFeatureIcon = (feature: string) => {
+    switch (feature) {
+      case 'parking': return <LocalParking fontSize="small" />;
+      case 'balcony': return <Deck fontSize="small" />;
+      case 'elevator': return <Elevator fontSize="small" />;
+      case 'garden': return <Yard fontSize="small" />;
+      case 'furnished': return <Weekend fontSize="small" />;
+      case 'petFriendly': return <Pets fontSize="small" />;
+      default: return <CheckCircle fontSize="small" />;
+    }
+  };
+
+  // Get active features
+  const activeFeatures = property.features 
+    ? Object.entries(property.features)
+        .filter(([_, value]) => value)
+        .map(([key]) => key)
+    : [];
 
   return (
     <Card 
@@ -113,6 +159,8 @@ export const PropertyCard = ({ property, isFavorite = false, onToggleFavorite }:
       <Box 
         component={RouterLink} 
         to={`/properties/${property.id}`}
+        onMouseEnter={() => setShowFeatures(true)}
+        onMouseLeave={() => setShowFeatures(false)}
         sx={{ 
           position: 'relative', 
           paddingTop: '100%', /* 1:1 aspect ratio */
@@ -147,6 +195,61 @@ export const PropertyCard = ({ property, isFavorite = false, onToggleFavorite }:
             display: imageLoaded ? 'block' : 'none',
           }}
         />
+
+        {/* Energy Rating Badge - Top Right */}
+        {property.energyRating && (
+          <Chip
+            label={property.energyRating}
+            size="small"
+            sx={{
+              position: 'absolute',
+              top: 12,
+              right: 12,
+              bgcolor: getEnergyRatingColor(property.energyRating),
+              color: 'white',
+              fontWeight: 700,
+              fontSize: '0.875rem',
+              px: 0.5,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+            }}
+          />
+        )}
+
+        {/* Property Features Overlay - Shows on hover */}
+        {activeFeatures.length > 0 && showFeatures && (
+          <Fade in={showFeatures}>
+            <Paper
+              elevation={3}
+              sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                bgcolor: 'rgba(255, 255, 255, 0.95)',
+                borderRadius: 2,
+                p: 2,
+                minWidth: '200px',
+                maxWidth: '80%',
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>
+                {t('property:card.features')}
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {activeFeatures.map((feature) => (
+                  <Chip
+                    key={feature}
+                    icon={getFeatureIcon(feature)}
+                    label={t(`property:features.${feature}`)}
+                    size="small"
+                    variant="outlined"
+                    sx={{ fontSize: '0.75rem' }}
+                  />
+                ))}
+              </Box>
+            </Paper>
+          </Fade>
+        )}
       </Box>
 
       {/* Action buttons - Instagram style */}
